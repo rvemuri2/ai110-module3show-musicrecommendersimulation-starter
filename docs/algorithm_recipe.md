@@ -19,12 +19,12 @@ Defined in `src/main.py` as the `user_prefs` dictionary:
 
 ```python
 user_prefs = {
-    "favorite_genre": "lofi",       # categorical exact-match
-    "favorite_mood": "focused",     # categorical exact-match
-    "target_energy": 0.40,          # numeric, want it close
-    "target_valence": 0.55,         # numeric, want it close
-    "target_danceability": 0.55,    # numeric, want it close
-    "target_acousticness": 0.80,    # numeric, want it close
+    "favorite_genre": "pop",        # categorical exact-match
+    "favorite_mood": "happy",       # categorical exact-match
+    "target_energy": 0.80,          # numeric, want it close
+    "target_valence": 0.80,         # numeric, want it close
+    "target_danceability": 0.80,    # numeric, want it close
+    "target_acousticness": 0.15,    # numeric, want it close
 }
 ```
 
@@ -90,12 +90,12 @@ if abs(user_prefs["target_energy"] - song.energy) <= 0.15:  reasons.append("ener
 
 ## Sanity Check
 
-With the lo-fi study profile above, **Focus Flow (id 9)** should top the list
+With the pop / happy profile above, **Sunrise City (id 1)** should top the list
 with a perfect **11/11**: genre (3) + mood (2) + energy (2) + acousticness (2) +
-valence (1) + danceability (1). **Library Rain (id 4)** and **Midnight Coding
-(id 2)** follow, each scoring **9** (they match everything except mood, so they
-tie and id 4 comes first). This is the expected outcome to confirm the recipe is
-wired correctly.
+valence (1) + danceability (1). **Gym Hero (id 5)** follows with **9** (it is
+also pop and matches the feel, but its mood is "intense", not "happy"), and songs
+in other genres such as **Rooftop Lights (indie pop, id 10)** score lower. This
+is the expected outcome to confirm the recipe is wired correctly.
 
 ## Scope Note
 

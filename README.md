@@ -87,15 +87,55 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Below is real output from running `python -m src.main` with the pop / happy
+taste profile, showing each song's title, score, and the reasons that produced it:
 
 ```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+Loaded songs: 18
+
+============================================================
+  Top 5 recommendations for your taste profile
+  genre=pop | mood=happy | energy=0.8
+============================================================
+
+1. Sunrise City — Neon Echo
+   Score: 11.00
+     • genre match (pop) (+3)
+     • mood match (happy) (+2)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+2. Gym Hero — Max Pulse
+   Score: 9.00
+     • genre match (pop) (+3)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+3. Rooftop Lights — Indigo Parade
+   Score: 6.00
+     • mood match (happy) (+2)
+     • energy close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+4. Voltage Peak — Pulsewave
+   Score: 6.00
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+5. Storm Runner — Voltline
+   Score: 5.00
+     • energy close (+2)
+     • acousticness close (+2)
+     • danceability close (+1)
+
+============================================================
 ```
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or demo video link here -->

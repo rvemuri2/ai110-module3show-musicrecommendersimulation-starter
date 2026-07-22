@@ -37,28 +37,58 @@ class Recommender:
     OOP implementation of the recommendation logic.
     Required by tests/test_recommender.py
     """
+    # Numeric feature counts as a match within this distance (0-1 scale).
+    CLOSE = 0.15
+    # A song is considered "acoustic" at or above this acousticness value.
+    ACOUSTIC_THRESHOLD = 0.5
+
     def __init__(self, songs: List[Song]):
         self.songs = songs
 
+    def _score(self, user: UserProfile, song: Song) -> Tuple[float, List[str]]:
+        """Score one Song against a UserProfile; returns (score, reasons)."""
+        score = 0.0
+        reasons: List[str] = []
+
+        if song.genre == user.favorite_genre:
+            score += 3
+            reasons.append(f"genre match ({song.genre}) (+3)")
+
+        if song.mood == user.favorite_mood:
+            score += 2
+            reasons.append(f"mood match ({song.mood}) (+2)")
+
+        if abs(user.target_energy - song.energy) <= self.CLOSE:
+            score += 2
+            reasons.append("energy close (+2)")
+
+        # likes_acoustic is a boolean, so reward songs whose acousticness agrees
+        # with the preference (acoustic when wanted, non-acoustic when not).
+        is_acoustic = song.acousticness >= self.ACOUSTIC_THRESHOLD
+        if is_acoustic == user.likes_acoustic:
+            score += 2
+            fit = "acoustic" if user.likes_acoustic else "non-acoustic"
+            reasons.append(f"{fit} as you prefer (+2)")
+
+        return score, reasons
+
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
-        # TODO: Implement recommendation logic
-        return self.songs[:k]
+        """Return the top k songs ranked by score, ties broken by lowest id."""
+        ranked = sorted(
+            self.songs,
+            key=lambda song: (-self._score(user, song)[0], song.id),
+        )
+        return ranked[:k]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
-        # TODO: Implement explanation logic
-        return "Explanation placeholder"
+        """Return a human-readable explanation of why a song was recommended."""
+        _, reasons = self._score(user, song)
+        if not reasons:
+            return "Recommended as a fallback; it does not strongly match your preferences."
+        return "; ".join(reasons)
 
 def load_songs(csv_path: str) -> List[Dict]:
-    """
-    Loads songs from a CSV file and returns a list of dictionaries.
-
-    Numeric columns are converted so we can do math later:
-    - `id` becomes an int
-    - the audio-feature columns become floats
-    Text columns (title, artist, genre, mood) are left as strings.
-
-    Required by src/main.py
-    """
+    """Load songs from a CSV into a list of dicts, casting numeric columns."""
     int_fields = {"id"}
     float_fields = {
         "energy",
@@ -87,21 +117,7 @@ def load_songs(csv_path: str) -> List[Dict]:
     return songs
 
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
-    """
-    Scores a single song against user preferences using the points system from
-    docs/algorithm_recipe.md.
-
-    Points awarded:
-    - genre match         +3
-    - mood match          +2
-    - energy close        +2   (within 0.15 of target)
-    - acousticness close  +2   (within 0.15 of target)
-    - valence close       +1   (within 0.15 of target)
-    - danceability close  +1   (within 0.15 of target)
-
-    Returns a (score, reasons) tuple, where reasons explains each category that
-    earned points, e.g. "genre match (+3)".
-    """
+    """Score a song dict against user prefs (see docs/algorithm_recipe.md); returns (score, reasons)."""
     CLOSE = 0.15  # numeric features count as a match within this distance (0-1 scale)
 
     score = 0.0
@@ -131,10 +147,15 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     return score, reasons
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
-    """
-    Functional implementation of the recommendation logic.
-    Required by src/main.py
-    """
-    # TODO: Implement scoring and ranking logic
-    # Expected return format: (song_dict, score, explanation)
-    return []
+    """Rank songs with score_song() and return the top k as (song, score, explanation) tuples."""
+    scored = [
+        (song, *score_song(user_prefs, song))
+        for song in songs
+    ]
+
+    ranked = sorted(scored, key=lambda item: (-item[1], item[0]["id"]))
+
+    return [
+        (song, score, "; ".join(reasons) if reasons else "no strong matches")
+        for song, score, reasons in ranked[:k]
+    ]
