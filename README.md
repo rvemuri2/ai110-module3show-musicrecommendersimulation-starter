@@ -144,9 +144,7 @@ Loaded songs: 18
 
 ## Experiments You Tried
 
-I ran the recommender against five taste profiles: three "normal" ones and two
-adversarial edge cases designed to try to trick the scoring. The output for each
-is below.
+I ran the recommender against five taste profiles: three "normal" ones and two adversarial edge cases designed to try to trick the scoring. The output for each is below.
 
 ### Chill Lofi
 
@@ -245,13 +243,8 @@ away from its 0.66 — just past the 0.15 threshold).
 
 ### Adversarial: Hyper but Sad/Acoustic (conflicting targets)
 
-This profile asks for maximum energy AND a quiet, sad, acoustic, undanceable
-sound — a combination no real song has. The scores collapse (the winner only
-reaches 5), which is correct. But the #1 pick, Storm Runner, is the *opposite* of
-the acoustic/sad request: it wins purely on genre (+3) and energy (+2). A
-points-sum can still confidently rank a song first when it nails the high-weight
-fields and flunks the rest. Note also that `mood="sad"` does not exist in the
-dataset and silently scores 0 with no warning.
+This profile asks for maximum energy AND a quiet, sad, acoustic,undanceable sound — a combination no real song has. The scores collapse (the winner only reaches 5), which is correct. But the #1 pick, Storm Runner, is the _opposite_ of the acoustic/sad request: it wins purely on genre (+3) and energy (+2). A points-sum can still confidently rank a song first when it nails the high-weight
+fields and flunks the rest. Note also that `mood="sad"` does not exist in the dataset and silently scores 0 with no warning.
 
 ```
 ============================================================
@@ -336,6 +329,8 @@ Examples:
 - It does not understand lyrics or language
 - It might over favor one genre or mood
 
+This recommender runs on a tiny catalog of 18 songs, so it quickly runs out of good matches. It does not understand lyrics, language, or context like time of day, and it only learns from one user's stated preferences, not from real listening history. Because genre is worth the most points and uses exact matching, it can over-favor one genre and ignore similar styles (for example "indie pop" earns nothing for a "pop" fan). The main risk is that its confident, reason-backed picks can feel trustworthy even when the match is weak or biased.
+
 You will go deeper on this in your model card.
 
 ---
@@ -350,3 +345,7 @@ Write 1 to 2 paragraphs here about what you learned:
 
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
+
+I learned that a recommender turns data into predictions with something surprisingly simple: it scores each item against a user's preferences and sorts the results. There is no magic, just numbers, weights, and a ranking, yet attaching a reason to each pick makes the output feel thoughtful and personal.
+
+I also saw how easily bias creeps in. The weights I chose decided what counted as a "good" song, so favoring genre quietly pushed similar styles out, and my hard 0.15 energy cutoff under-served users with in-between or extreme tastes. It made me realize that in real systems, the people who set the rules and pick the data shape what everyone sees, so recommendations are choices, not neutral facts.
