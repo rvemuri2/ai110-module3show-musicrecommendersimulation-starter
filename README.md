@@ -87,15 +87,17 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Below is real output from running `python -m src.main` with the pop / happy
-taste profile, showing each song's title, score, and the reasons that produced it:
+Running `python -m src.main` scores every song against several taste profiles
+and prints the top 5 for each. Below is the first profile, **High-Energy Pop**
+(the remaining profiles, including two adversarial edge cases, are in
+[Experiments You Tried](#experiments-you-tried)):
 
 ```
 Loaded songs: 18
 
 ============================================================
-  Top 5 recommendations for your taste profile
-  genre=pop | mood=happy | energy=0.8
+  High-Energy Pop — top 5
+  genre=pop | mood=happy | energy=0.9
 ============================================================
 
 1. Sunrise City — Neon Echo
@@ -129,13 +131,11 @@ Loaded songs: 18
      • valence close (+1)
      • danceability close (+1)
 
-5. Storm Runner — Voltline
+5. Concrete Kings — Blocktape
    Score: 5.00
      • energy close (+2)
      • acousticness close (+2)
      • danceability close (+1)
-
-============================================================
 ```
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or demo video link here -->
@@ -144,11 +144,185 @@ Loaded songs: 18
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+I ran the recommender against five taste profiles: three "normal" ones and two
+adversarial edge cases designed to try to trick the scoring. The output for each
+is below.
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+### Chill Lofi
+
+A clean match — the two lofi/chill songs tie at a perfect 11.
+
+```
+============================================================
+  Chill Lofi — top 5
+  genre=lofi | mood=chill | energy=0.35
+============================================================
+
+1. Midnight Coding — LoRoom
+   Score: 11.00
+     • genre match (lofi) (+3)
+     • mood match (chill) (+2)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+2. Library Rain — Paper Lanterns
+   Score: 11.00
+     • genre match (lofi) (+3)
+     • mood match (chill) (+2)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+3. Focus Flow — LoRoom
+   Score: 9.00
+     • genre match (lofi) (+3)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+4. Spacewalk Thoughts — Orbit Bloom
+   Score: 8.00
+     • mood match (chill) (+2)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+5. Paper Boats — Fenwood
+   Score: 6.00
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+```
+
+### Deep Intense Rock
+
+Storm Runner wins at 10 (it misses only danceability, whose target 0.50 is 0.16
+away from its 0.66 — just past the 0.15 threshold).
+
+```
+============================================================
+  Deep Intense Rock — top 5
+  genre=rock | mood=intense | energy=0.9
+============================================================
+
+1. Storm Runner — Voltline
+   Score: 10.00
+     • genre match (rock) (+3)
+     • mood match (intense) (+2)
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+
+2. Gym Hero — Max Pulse
+   Score: 6.00
+     • mood match (intense) (+2)
+     • energy close (+2)
+     • acousticness close (+2)
+
+3. Concrete Kings — Blocktape
+   Score: 5.00
+     • energy close (+2)
+     • acousticness close (+2)
+     • valence close (+1)
+
+4. Iron Verdict — Ashfall
+   Score: 5.00
+     • energy close (+2)
+     • acousticness close (+2)
+     • danceability close (+1)
+
+5. Sunrise City — Neon Echo
+   Score: 4.00
+     • energy close (+2)
+     • acousticness close (+2)
+```
+
+### Adversarial: Hyper but Sad/Acoustic (conflicting targets)
+
+This profile asks for maximum energy AND a quiet, sad, acoustic, undanceable
+sound — a combination no real song has. The scores collapse (the winner only
+reaches 5), which is correct. But the #1 pick, Storm Runner, is the *opposite* of
+the acoustic/sad request: it wins purely on genre (+3) and energy (+2). A
+points-sum can still confidently rank a song first when it nails the high-weight
+fields and flunks the rest. Note also that `mood="sad"` does not exist in the
+dataset and silently scores 0 with no warning.
+
+```
+============================================================
+  Adversarial: Hyper but Sad/Acoustic — top 5
+  genre=rock | mood=sad | energy=0.95
+============================================================
+
+1. Storm Runner — Voltline
+   Score: 5.00
+     • genre match (rock) (+3)
+     • energy close (+2)
+
+2. Winter Elegy — Anna Vorne
+   Score: 3.00
+     • acousticness close (+2)
+     • danceability close (+1)
+
+3. Sunrise City — Neon Echo
+   Score: 2.00
+     • energy close (+2)
+
+4. Library Rain — Paper Lanterns
+   Score: 2.00
+     • acousticness close (+2)
+
+5. Gym Hero — Max Pulse
+   Score: 2.00
+     • energy close (+2)
+```
+
+### Adversarial: Nonexistent Taste (kpop / angry, all numerics at 0.5)
+
+Genre and mood can never match, and every numeric target sits at 0.5. The result
+is a pile of near-tied low scores (four songs tie at 4), so the lowest-`id`
+tie-breaker effectively becomes the ranker. The system never reports "no good
+match" — it always returns 5 songs with false confidence.
+
+```
+============================================================
+  Adversarial: Nonexistent Taste — top 5
+  genre=kpop | mood=angry | energy=0.5
+============================================================
+
+1. Midnight Coding — LoRoom
+   Score: 4.00
+     • energy close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+2. Focus Flow — LoRoom
+   Score: 4.00
+     • energy close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+3. Island Time — Sun Rebels
+   Score: 4.00
+     • energy close (+2)
+     • acousticness close (+2)
+
+4. Dusty Roads Home — Clay Hartman
+   Score: 4.00
+     • energy close (+2)
+     • valence close (+1)
+     • danceability close (+1)
+
+5. Coffee Shop Stories — Slow Stereo
+   Score: 3.00
+     • energy close (+2)
+     • danceability close (+1)
+```
 
 ---
 

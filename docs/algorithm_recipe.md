@@ -15,16 +15,18 @@ points system (no machine learning, no other-user data).
 
 ## The Taste Profile
 
-Defined in `src/main.py` as the `user_prefs` dictionary:
+A taste profile is a dictionary of target values. `src/main.py` defines several
+of them in a `PROFILES` dict and scores every song against each. The examples
+below use the **High-Energy Pop** profile:
 
 ```python
 user_prefs = {
     "favorite_genre": "pop",        # categorical exact-match
     "favorite_mood": "happy",       # categorical exact-match
-    "target_energy": 0.80,          # numeric, want it close
-    "target_valence": 0.80,         # numeric, want it close
-    "target_danceability": 0.80,    # numeric, want it close
-    "target_acousticness": 0.15,    # numeric, want it close
+    "target_energy": 0.90,          # numeric, want it close
+    "target_valence": 0.85,         # numeric, want it close
+    "target_danceability": 0.85,    # numeric, want it close
+    "target_acousticness": 0.10,    # numeric, want it close
 }
 ```
 
@@ -90,7 +92,7 @@ if abs(user_prefs["target_energy"] - song.energy) <= 0.15:  reasons.append("ener
 
 ## Sanity Check
 
-With the pop / happy profile above, **Sunrise City (id 1)** should top the list
+With the High-Energy Pop profile above, **Sunrise City (id 1)** should top the list
 with a perfect **11/11**: genre (3) + mood (2) + energy (2) + acousticness (2) +
 valence (1) + danceability (1). **Gym Hero (id 5)** follows with **9** (it is
 also pop and matches the feel, but its mood is "intense", not "happy"), and songs
