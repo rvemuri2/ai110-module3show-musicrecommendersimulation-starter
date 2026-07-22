@@ -15,8 +15,15 @@ from recommender import load_songs, recommend_songs
 def main() -> None:
     songs = load_songs("data/songs.csv") 
 
-    # Starter example profile
-    user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
+    # Taste profile: a "lo-fi study listener"
+    user_prefs = {
+        "favorite_genre": "lofi",       # categorical exact-match
+        "favorite_mood": "focused",     # categorical exact-match
+        "target_energy": 0.40,          # numeric: 1 - |target - value|
+        "target_valence": 0.55,         # separates happy-calm from sad-calm
+        "target_danceability": 0.55,    # separates groovy from static
+        "target_acousticness": 0.80,    # full 0-1 signal (not a boolean)
+    }
 
     recommendations = recommend_songs(user_prefs, songs, k=5)
 

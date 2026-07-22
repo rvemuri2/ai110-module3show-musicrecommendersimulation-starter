@@ -17,6 +17,8 @@ class Song:
     valence: float
     danceability: float
     acousticness: float
+    instrumentalness: float
+    loudness: float
 
 @dataclass
 class UserProfile:
