@@ -124,10 +124,9 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     reasons: List[str] = []
 
     # Categorical features: exact match earns the points.
-    # EXPERIMENT (weight shift): genre halved 3 -> 1.5, energy doubled 2 -> 4.
     if song["genre"] == user_prefs["favorite_genre"]:
-        score += 1.5
-        reasons.append(f"genre match ({song['genre']}) (+1.5)")
+        score += 3
+        reasons.append(f"genre match ({song['genre']}) (+3)")
 
     if song["mood"] == user_prefs["favorite_mood"]:
         score += 2
@@ -135,7 +134,7 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
 
     # Numeric features: earn the points when the value is close to the target.
     numeric = [
-        ("target_energy", "energy", 4, "energy"),
+        ("target_energy", "energy", 2, "energy"),
         ("target_acousticness", "acousticness", 2, "acousticness"),
         ("target_valence", "valence", 1, "valence"),
         ("target_danceability", "danceability", 1, "danceability"),
